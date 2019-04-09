@@ -1715,9 +1715,13 @@ const _startRenderLoop = () => {
         timestamps.last = now;
       }
     } else if (oculusMobileVrPresentState.vrContext) {
-      oculusMobileVrPresentState.hasPose = oculusMobileVrPresentState.vrContext.WaitGetPoses(
-        oculusMobilePoseFloat32Array
-      );
+      await new Promise((accept, reject) => {
+        oculusMobileVrPresentState.hasPose = oculusMobileVrPresentState.vrContext.WaitGetPoses(
+          oculusMobilePoseFloat32Array
+        );
+
+        accept();
+      });
 
       // build hmd data
       let index = oculusMobilePoseFloat32Array.byteOffset;
