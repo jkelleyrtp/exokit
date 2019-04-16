@@ -590,6 +590,8 @@ if (nativeBindings.nativeOculusVR) {
     }
   }
   nativeBindings.nativeOculusVR.exitPresent = function () {
+    system.ExitPresent();
+
     return Promise.resolve();
   };
 }
