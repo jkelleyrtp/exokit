@@ -752,7 +752,7 @@ const oculusMobileVrPresentState = {
   msFbo: null,
   msTex: null,
   msDepthTex: null,
-  fbo: null,
+  fbos: null,
   tex: null,
   depthTex: null,
   cleanups: null,
@@ -794,7 +794,7 @@ if (nativeBindings.nativeOculusMobileVr) {
 
         const cleanups = [];
 
-        const [fbo, tex, depthTex, msFbo, msTex, msDepthTex] = vrContext.CreateSwapChain(context, width, height);
+        const [fbos, tex, depthTex, msFbo, msTex, msDepthTex] = vrContext.CreateSwapChain(context, width, height);
         // const [fbo, tex, depthTex, msFbo, msTex, msDepthTex] = nativeBindings.nativeWindow.createRenderTarget(context, width, height, 0, 0, 0, 0);
 
         context.setDefaultFramebuffer(msFbo);
@@ -805,7 +805,7 @@ if (nativeBindings.nativeOculusMobileVr) {
         oculusMobileVrPresentState.msFbo = msFbo;
         oculusMobileVrPresentState.msTex = msTex;
         oculusMobileVrPresentState.msDepthTex = msDepthTex;
-        oculusMobileVrPresentState.fbo = fbo;
+        oculusMobileVrPresentState.fbos = fbos;
         oculusMobileVrPresentState.tex = tex;
         oculusMobileVrPresentState.depthTex = depthTex;
         oculusMobileVrPresentState.cleanups = cleanups;
@@ -816,7 +816,7 @@ if (nativeBindings.nativeOculusMobileVr) {
           msFbo,
           msTex,
           msDepthTex,
-          fbo,
+          fbos,
           tex,
           depthTex,
         };
@@ -825,15 +825,15 @@ if (nativeBindings.nativeOculusMobileVr) {
           if (name === 'width' || name === 'height') {
             nativeBindings.nativeWindow.setCurrentWindowContext(windowHandle);
 
-            const [fbo, tex, depthTex, msFbo, msTex, msDepthTex] = vrContext.CreateSwapChain(context, canvas.width, canvas.height);
+            const [fbos, tex, depthTex, msFbo, msTex, msDepthTex] = vrContext.CreateSwapChain(context, canvas.width, canvas.height);
             context.setDefaultFramebuffer(msFbo);
-            oculusMobileVrPresentState.fbo = fbo;
+            oculusMobileVrPresentState.fbos = fbos;
             oculusMobileVrPresentState.tex = tex;
             oculusMobileVrPresentState.depthTex = depthTex;
             oculusMobileVrPresentState.msFbo = msFbo;
             oculusMobileVrPresentState.msTex = msTex;
             oculusMobileVrPresentState.msDepthTex = msDepthTex;
-            canvas.framebuffer.fbo = fbo;
+            canvas.framebuffer.fbos = fbos;
             canvas.framebuffer.tex = tex;
             canvas.framebuffer.depthTex = depthTex;
             canvas.framebuffer.msFbo = msFbo;
@@ -855,14 +855,14 @@ if (nativeBindings.nativeOculusMobileVr) {
         return canvas.framebuffer;
       } else if (canvas.ownerDocument.framebuffer) {
         const {width, height} = canvas;
-        const {msFbo, msTex, msDepthTex, fbo, tex, depthTex} = canvas.ownerDocument.framebuffer;
+        const {msFbo, msTex, msDepthTex, fbos, tex, depthTex} = canvas.ownerDocument.framebuffer;
         return {
           width,
           height,
           msFbo,
           msTex,
           msDepthTex,
-          fbo,
+          fbos,
           tex,
           depthTex,
         };
@@ -870,14 +870,14 @@ if (nativeBindings.nativeOculusMobileVr) {
         /* const {width: halfWidth, height} = oculusMobileVrPresentState.vrContext.GetRecommendedRenderTargetSize();
         const width = halfWidth * 2; */
 
-        const {msFbo, msTex, msDepthTex, fbo, tex, depthTex} = oculusMobileVrPresentState;
+        const {msFbo, msTex, msDepthTex, fbos, tex, depthTex} = oculusMobileVrPresentState;
         return {
           width: xrState.renderWidth[0] * 2,
           height: xrState.renderHeight[0],
           msFbo,
           msTex,
           msDepthTex,
-          fbo,
+          fbos,
           tex,
           depthTex,
         };
@@ -890,8 +890,9 @@ if (nativeBindings.nativeOculusMobileVr) {
     if (oculusMobileVrPresentState.isPresenting) {
       nativeBindings.nativeOculusMobileVr.OculusMobile_Shutdown();
 
-      nativeBindings.nativeWindow.destroyRenderTarget(oculusMobileVrPresentState.msFbo, oculusMobileVrPresentState.msTex, oculusMobileVrPresentState.msDepthStencilTex);
-      nativeBindings.nativeWindow.destroyRenderTarget(oculusMobileVrPresentState.fbo, oculusMobileVrPresentState.tex, oculusMobileVrPresentState.msDepthTex);
+      // XXX destroy the swap chain
+      // nativeBindings.nativeWindow.destroyRenderTarget(oculusMobileVrPresentState.msFbo, oculusMobileVrPresentState.msTex, oculusMobileVrPresentState.msDepthStencilTex);
+      // nativeBindings.nativeWindow.destroyRenderTarget(oculusMobileVrPresentState.fbo, oculusMobileVrPresentState.tex, oculusMobileVrPresentState.msDepthTex);
 
       const context = oculusMobileVrPresentState.glContext;
       nativeBindings.nativeWindow.setCurrentWindowContext(context.getWindowHandle());
@@ -907,7 +908,7 @@ if (nativeBindings.nativeOculusMobileVr) {
       oculusMobileVrPresentState.msFbo = null;
       oculusMobileVrPresentState.msTex = null;
       oculusMobileVrPresentState.msDepthTex = null;
-      oculusMobileVrPresentState.fbo = null;
+      oculusMobileVrPresentState.fbos = null;
       oculusMobileVrPresentState.tex = null;
       oculusMobileVrPresentState.depthTex = null;
       oculusMobileVrPresentState.cleanups = null;
@@ -1398,8 +1399,6 @@ const _startRenderLoop = () => {
 
             oculusMobileVrPresentState.vrContext.Submit();
             oculusMobileVrPresentState.hasPose = false;
-
-            // nativeWindow.blitFrameBuffer(context, oculusMobileVrPresentState.fbo, 0, oculusMobileVrPresentState.glContext.canvas.width * (args.blit ? 0.5 : 1), oculusMobileVrPresentState.glContext.canvas.height, xrState.renderWidth[0], xrState.renderHeight[0], true, false, false);
           } else if (mlPresentState.mlGlContext === context && mlPresentState.mlHasPose) {
             if (mlPresentState.layers.length > 0) { // TODO: composition can be directly to the output texture array
               const {magicLeapDisplay} = window[symbols.mrDisplaysSymbol];
@@ -1411,8 +1410,6 @@ const _startRenderLoop = () => {
 
             mlPresentState.mlContext.SubmitFrame(mlPresentState.mlTex, mlPresentState.mlGlContext.canvas.width, mlPresentState.mlGlContext.canvas.height);
             mlPresentState.mlHasPose = false;
-
-            // nativeWindow.blitFrameBuffer(context, mlPresentState.mlFbo, 0, mlPresentState.mlGlContext.canvas.width, mlPresentState.mlGlContext.canvas.height, xrState.renderWidth[0], xrState.renderHeight[0],, true, false, false);
           } else if (fakePresentState.layers.length > 0) {
             const {fakeVrDisplay} = window[symbols.mrDisplaysSymbol];
             _decorateModelViewProjections(fakePresentState.layers, fakeVrDisplay, 1);
