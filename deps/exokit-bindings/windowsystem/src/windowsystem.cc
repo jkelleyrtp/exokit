@@ -574,7 +574,8 @@ void ComposeLayer(ComposeSpec *composeSpec, PlaneSpec *planeSpec, const LayerSpe
       glUniformMatrix4fv(planeSpec->modelViewMatrixLocation, 1, false, layer.modelView[0]);
       glUniformMatrix4fv(planeSpec->projectionMatrixLocation, 1, false, layer.projection[0]);
 
-      glViewport(layer.viewports[0][0], layer.viewports[0][1], layer.viewports[0][2], layer.viewports[0][3]);
+      // glViewport(layer.viewports[0][0], layer.viewports[0][1], layer.viewports[0][2], layer.viewports[0][3]);
+      glViewport(0, 0, layer.width/2, layer.height);
       // glScissor(0, 0, width, height);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
     }
@@ -582,7 +583,8 @@ void ComposeLayer(ComposeSpec *composeSpec, PlaneSpec *planeSpec, const LayerSpe
       glUniformMatrix4fv(planeSpec->modelViewMatrixLocation, 1, false, layer.modelView[1]);
       glUniformMatrix4fv(planeSpec->projectionMatrixLocation, 1, false, layer.projection[1]);
 
-      glViewport(layer.viewports[1][0], layer.viewports[1][1], layer.viewports[1][2], layer.viewports[1][3]);
+      // glViewport(layer.viewports[1][0], layer.viewports[1][1], layer.viewports[1][2], layer.viewports[1][3]);
+      glViewport(layer.width/2, 0, layer.width/2, layer.height);
       // glScissor(0, 0, width, height);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
     }
@@ -691,7 +693,6 @@ NAN_METHOD(ComposeLayers) {
               tex,
               depthTex,
               {nullptr,nullptr},
-              {nullptr,nullptr},
               {nullptr,nullptr}
             });
             break;
@@ -699,11 +700,11 @@ NAN_METHOD(ComposeLayers) {
           case LayerType::IFRAME_2D: {
             Local<Object> browserObj = Local<Object>::Cast(elementObj->Get(JS_STR("browser")));
             GLuint tex = TO_UINT32(Local<Object>::Cast(browserObj->Get(JS_STR("texture")))->Get(JS_STR("id")));
-            Local<Array> viewportsArray = Local<Array>::Cast(browserObj->Get(JS_STR("viewports")));
+            /* Local<Array> viewportsArray = Local<Array>::Cast(browserObj->Get(JS_STR("viewports"))); // XXX get rid of this in callers
             Local<Float32Array> viewportsFloat32Arrays[] = {
               Local<Float32Array>::Cast(viewportsArray->Get(0)),
               Local<Float32Array>::Cast(viewportsArray->Get(1)),
-            };
+            }; */
             Local<Array> modelViewArray = Local<Array>::Cast(browserObj->Get(JS_STR("modelView")));
             Local<Float32Array> modelViewFloat32Arrays[] = {
               Local<Float32Array>::Cast(modelViewArray->Get(0)),
@@ -725,10 +726,6 @@ NAN_METHOD(ComposeLayers) {
               0,
               tex,
               0,
-              { // viewports
-                (float *)((char *)(viewportsFloat32Arrays[0]->Buffer()->GetContents().Data()) + viewportsFloat32Arrays[0]->ByteOffset()),
-                (float *)((char *)(viewportsFloat32Arrays[1]->Buffer()->GetContents().Data()) + viewportsFloat32Arrays[1]->ByteOffset())
-              },
               { // modelView
                 (float *)((char *)(modelViewFloat32Arrays[0]->Buffer()->GetContents().Data()) + modelViewFloat32Arrays[0]->ByteOffset()),
                 (float *)((char *)(modelViewFloat32Arrays[1]->Buffer()->GetContents().Data()) + modelViewFloat32Arrays[1]->ByteOffset())
@@ -757,7 +754,6 @@ NAN_METHOD(ComposeLayers) {
               msDepthTex,
               tex,
               depthTex,
-              {nullptr,nullptr},
               {nullptr,nullptr},
               {nullptr,nullptr}
             });
