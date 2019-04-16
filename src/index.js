@@ -629,6 +629,8 @@ if (nativeBindings.nativeOpenVR) {
 
         const cleanups = [];
 
+        system.RequestPresent(context, width, height); // XXX use this instead of the below swap chain
+
         const [fbo, tex, depthTex, msFbo, msTex, msDepthTex] = nativeBindings.nativeWindow.createRenderTarget(context, width, height, 0, 0, 0, 0);
 
         context.setDefaultFramebuffer(msFbo);
@@ -1380,7 +1382,7 @@ const _startRenderLoop = () => {
               nativeWindow.blitFrameBuffer(context, oculusMobileVrPresentState.msFbo, oculusMobileVrPresentState.fbo, oculusMobileVrPresentState.glContext.canvas.width, oculusMobileVrPresentState.glContext.canvas.height, oculusMobileVrPresentState.glContext.canvas.width, oculusMobileVrPresentState.glContext.canvas.height, true, false, false);
             }
 
-            oculusMobileVrPresentState.vrContext.Submit(oculusMobileVrPresentState.glContext, oculusMobileVrPresentState.fbo, oculusMobileVrPresentState.glContext.canvas.width, oculusMobileVrPresentState.glContext.canvas.height);
+            oculusMobileVrPresentState.vrContext.Submit(oculusMobileVrPresentState.glContext);
             oculusMobileVrPresentState.hasPose = false;
 
             // nativeWindow.blitFrameBuffer(context, oculusMobileVrPresentState.fbo, 0, oculusMobileVrPresentState.glContext.canvas.width * (args.blit ? 0.5 : 1), oculusMobileVrPresentState.glContext.canvas.height, xrState.renderWidth[0], xrState.renderHeight[0], true, false, false);
